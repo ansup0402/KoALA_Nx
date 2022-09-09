@@ -69,15 +69,17 @@ class koala_nx_launcher:
         self.setProgressMsg('[1 단계] 노드, edge 레이어 초기화...')
         if self.feedback.isCanceled(): return None
 
-        self.setDebugProgressMsg("[debug] 노드 : createspatialindex, 객체 할당")
+        self.setDebugProgressMsg("노드 : createspatialindex, 객체 할당")
         model.nodeIDfield = self.parameters['IN_NODE_ID']
         model.createspatialindex(self.parameters['IN_NODE'].sourceName())
         model.nodelayer = self.parameters['IN_NODE']
 
-        self.setDebugProgressMsg("[debug] 링크 : createspatialindex, 객체 할당")
+        self.setDebugProgressMsg("링크 : createspatialindex, 객체 할당")
         model.linkFromnodefield = self.parameters['IN_LINK_FNODE']
         model.linkTonodefield = self.parameters['IN_LINK_TNODE']
         model.linklengthfield = self.parameters['IN_LINK_LENGTH']
+
+
         model.linkSpeed = self.parameters['IN_LINK_SPEED']
         model.createspatialindex(self.parameters['IN_LINK'].sourceName())
         model.linklayer = self.parameters['IN_LINK']
@@ -87,7 +89,7 @@ class koala_nx_launcher:
         self.setProgressMsg('[2 단계] 출발 레이어 초기화...')
         if self.feedback.isCanceled(): return None
 
-        self.setDebugProgressMsg("[debug] source layer : createspatialindex, nearesthubpoints, 객체 할당...")
+        self.setDebugProgressMsg("source layer : createspatialindex, nearesthubpoints, 객체 할당...")
         model.createspatialindex(self.parameters['IN_SOURCELYR'].sourceName())
         sourcelayer = self.parameters['IN_SOURCELYR']
         out_path = None
@@ -108,7 +110,7 @@ class koala_nx_launcher:
         self.setProgressMsg('[3 단계] 도착 레이어 초기화...')
         if self.feedback.isCanceled(): return None
 
-        self.setDebugProgressMsg("[debug] target layer : createspatialindex, nearesthubpoints, 객체 할당...")
+        self.setDebugProgressMsg("target layer : createspatialindex, nearesthubpoints, 객체 할당...")
         model.createspatialindex(self.parameters['IN_TARGETLYR'].sourceName())
         targetlayer = self.parameters['IN_TARGETLYR']
         out_path = None
@@ -130,17 +132,26 @@ class koala_nx_launcher:
         self.setProgressMsg('[4 단계] 네트워크 분석을 위한 기초데이터 생성...')
         if self.feedback.isCanceled(): return None
 
-        self.setDebugProgressMsg("[debug] nxGraph : initNXGraph...")
+        self.setDebugProgressMsg("nxGraph : initNXGraph...")
         isoneway = (self.parameters['IN_LINK_TYPE'] == 0)
         model.initNXGraph(isoneway=isoneway)
-        self.setDebugProgressMsg("[debug] nxGraph : createNodeEdgeInGraph...")
+        self.setDebugProgressMsg("nxGraph : createNodeEdgeInGraph...")
         graph = model.createNodeEdgeInGraph()
+
+
+        # 최근린 노드까지의 거리를 계산하기 위해 가상의 Nodelink 추가 필요.. -> 속도일때는 최소 앖으로 정해줌,
+        self.setDebugProgressMsg("target layer의 최근린 노드 추가 : addnearestNodeEdgeAsTargetlayer()...")
+        if self.feedback.isCanceled(): return None
+
+        self.setDebugProgressMsg("최근린 노드 추가 전 : 노드{}, 엣지{}".format(graph.number_of_nodes(), graph.number_of_edges()))
+        graph = model.addnearestNodeEdgeAsTargetlayer()
+        self.setDebugProgressMsg("최근린 노드 추가 후 : 노드{}, 엣지{}".format(graph.number_of_nodes(), graph.number_of_edges()))
 
 
         # 5. 분석 실행
         self.setProgressMsg('[5 단계] 네트워크 분석 실행...')
         if self.feedback.isCanceled(): return None
-        checklayer = ("[debug] 데이터 확인... \n"
+        checklayer = ("데이터 확인... \n"
                       "\t nodelayer : {} ({}) \n"
                       "\t linklayer : {} ({}) \n"
                       "\t sourceLayer : {} ({}) \n"
@@ -153,14 +164,14 @@ class koala_nx_launcher:
                                                    len(model.sourcelayer),
                                                    type(model.targetlayer),
                                                    len(model.targetlayer)))
-        self.setDebugProgressMsg("[debug] anal_NetworkSum()...")
+        self.setDebugProgressMsg("anal_NetworkSum()...")
         out = model.anal_NetworkSum()
 
 
         # 6. 분석 결과 저장
         self.setProgressMsg('[6 단계] 분석결과 저장...')
         if self.feedback.isCanceled(): return None
-        self.setDebugProgressMsg("[debug] make_networksumScore()...")
+        self.setDebugProgressMsg("make_networksumScore()...")
         # out_path = os.path.join(self.workpath, 'networksumScore.gpkg')
         finallayer = model.make_networksumScore(output=self.parameters["OUTPUT"])
         return finallayer

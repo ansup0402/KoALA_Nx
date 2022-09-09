@@ -43,7 +43,6 @@ class KoalaNxProvider(QgsProcessingProvider):
         """
          Default constructor.
          """
-
         self.debugging = False
         self.debugging = True
 

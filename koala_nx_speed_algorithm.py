@@ -36,6 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterVectorDestination,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
@@ -111,18 +112,19 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
+
         # 출발레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_SOURCELYR,
                 "❖ " + self.tr('Source Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
-
+        # QgsProcessingParameterFeatureSource
         # 도착레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_TARGETLYR,
                 "❖ " + self.tr('Target Layer'),
                 [QgsProcessing.TypeVectorPoint],
@@ -134,7 +136,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
 
         # 노드레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_NODE,
                 "❖ " + self.tr('Node Layer'),
                 [QgsProcessing.TypeVectorPoint],
@@ -154,7 +156,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
 
         # 링크레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_LINK,
                 "❖ " + self.tr('Link Layer'),
                 [QgsProcessing.TypeVectorLine],
