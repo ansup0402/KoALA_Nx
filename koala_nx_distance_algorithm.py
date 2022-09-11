@@ -36,6 +36,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterVectorDestination,
                        QgsProcessingAlgorithm,
                        QgsProcessingParameterFeatureSource,
+                       QgsProcessingParameterVectorLayer,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
@@ -63,6 +64,9 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
     # calling from the QGIS console.
     IN_SOURCELYR = 'IN_SOURCELYR'
     IN_TARGETLYR = 'IN_TARGETLYR'
+    # IN_SOURCELYR_ONLYSELECTED = 'IN_SOURCELYR_ONLYSELECTED'
+    # IN_TARGETLYR_ONLYSELECTED = 'IN_TARGETLYR_ONLYSELECTED'
+
 
     IN_NODE = 'IN_NODE'
     IN_NODE_ID = 'IN_NODE_ID'
@@ -108,18 +112,19 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         Here we define the inputs and output of the algorithm, along
         with some other properties.
         """
+
         # 출발레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_SOURCELYR,
                 "❖ " + self.tr('Source Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
-
+        # QgsProcessingParameterFeatureSource
         # 도착레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_TARGETLYR,
                 "❖ " + self.tr('Target Layer'),
                 [QgsProcessing.TypeVectorPoint],
@@ -131,7 +136,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
 
         # 노드레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_NODE,
                 "❖ " + self.tr('Node Layer'),
                 [QgsProcessing.TypeVectorPoint],
@@ -151,7 +156,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
 
         # 링크레이어
         self.addParameter(
-            QgsProcessingParameterFeatureSource(
+            QgsProcessingParameterVectorLayer(
                 self.IN_LINK,
                 "❖ " + self.tr('Link Layer'),
                 [QgsProcessing.TypeVectorLine],
@@ -204,7 +209,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         #         None,
         #         self.IN_LINK,
         #         QgsProcessingParameterField.Numeric,
-        #         optional=True)
+        #         optional=False)
         # )
 
         # 최종 결과
@@ -214,6 +219,45 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
                 self.tr('Result')
             )
         )
+    def onlyselectedfeature(self, parameters, context, paramID):
+        layersource = self.parameterAsSource(parameters, paramID, context)
+        layervertor = self.parameterAsVectorLayer(parameters, paramID, context)
+        onlyselectedFeature = (layersource.featureCount() >= 0 and layervertor is None)
+        return onlyselectedFeature
+
+    def getLayerfromParameter(self, parameters, context, paramID):
+        if self.onlyselectedfeature(parameters, context, paramID):
+            # return self.parameterAsSource(parameters, paramID, context), True
+            return self.parameterAsVectorLayer(parameters, paramID, context), True
+        else:
+            # return self.parameterAsSource(parameters, paramID, context), False
+            return self.parameterAsVectorLayer(parameters, paramID, context), False
+
+    def parameter2Dict(self, parameters, context):
+        keyword = {}
+
+        keyword['IN_SOURCELYR'], keyword['IN_SOURCELYR_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_SOURCELYR)
+        keyword['IN_TARGETLYR'], keyword['IN_TARGETLYR_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_TARGETLYR)
+
+        keyword['IN_NODE'], keyword['IN_NODE_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_NODE)
+        keyword['IN_NODE_ID'] = self.parameterAsFields(parameters, self.IN_NODE_ID, context)[0]
+
+        keyword['IN_LINK'], keyword['IN_LINK_ONLYSELECTED'] = self.getLayerfromParameter(parameters, context, self.IN_LINK)
+        keyword['IN_LINK_TYPE'] = self.parameterAsEnum(parameters, self.IN_LINK_TYPE, context)  # 0:단방향, 1:양방향
+        keyword['IN_LINK_FNODE'] = self.parameterAsFields(parameters, self.IN_LINK_FNODE, context)[0]
+        keyword['IN_LINK_TNODE'] = self.parameterAsFields(parameters, self.IN_LINK_TNODE, context)[0]
+        keyword['IN_LINK_LENGTH'] = self.parameterAsFields(parameters, self.IN_LINK_LENGTH, context)[0]
+
+        keyword['IN_LINK_SPEED'] = None
+
+        # if len(self.parameterAsFields(parameters, self.IN_LINK_SPEED, context)) == 0:
+        #     keyword['IN_LINK_SPEED'] = None
+        # else:
+        #     keyword['IN_LINK_SPEED'] = self.parameterAsFields(parameters, self.IN_LINK_SPEED, context)[0]
+
+        keyword['OUTPUT'] = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
+
+        return keyword
 
     def check_userinput(self, parameters):
         # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것
@@ -230,18 +274,21 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         except ImportError:
             from koala_nx_launcher import koala_nx_launcher
 
+
         if self.debugmode:
             feedback.pushInfo("****** [START DEBUG] ******")
             feedback.pushInfo(self.temporaryDirectory)
             # feedback.pushInfo(self.TEMP_DIR)
 
+        # launcher = soc_locator_launcher(feedback=feedback, context=context, parameters=params, debugging=debugging,
+        #                                 workpath=cur_dir)
         launcher = koala_nx_launcher(feedback=feedback, context=context, parameters=params, debugging=self.debugmode,
                                         workpath=self.temporaryDirectory)
 
-        out_vector = launcher.execute_nx_distance()
+
+        out_vector = launcher.execute_nx()
 
         return {self.OUTPUT: out_vector}
-
 
     def name(self):
         """
