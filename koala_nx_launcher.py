@@ -55,7 +55,7 @@ class koala_nx_launcher:
 
         return workspace
 
-    def execute_nx_speed(self):
+    def execute_nx(self):
         try:
             from .koala_model import koala_model
         except ImportError:

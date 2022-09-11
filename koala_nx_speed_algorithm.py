@@ -284,7 +284,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
                                         workpath=self.temporaryDirectory)
 
 
-        out_vector = launcher.execute_nx_speed()
+        out_vector = launcher.execute_nx()
 
         return {self.OUTPUT: out_vector}
 
