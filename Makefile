@@ -38,13 +38,13 @@ LOCALES =
 # translation
 SOURCES = \
 	__init__.py \
-	koala_network.py 
+	koala_nx.py 
 
 PLUGINNAME = koala_network
 
 PY_FILES = \
 	__init__.py \
-	koala_network.py 
+	koala_nx.py 
 
 UI_FILES = 
 
