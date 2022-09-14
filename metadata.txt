@@ -3,9 +3,9 @@
 # This file should be included when you package your plugin.# Mandatory items:
 
 [general]
-name=KoALA Network
+name=KoALA Nx
 qgisMinimumVersion=3.10
-description=KoALA Network
+description=KoALA Nx
 version=0.1
 author=Hyunjoong Kim
 email=khj1122452@gmail.com
