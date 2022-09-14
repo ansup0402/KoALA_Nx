@@ -43,7 +43,8 @@ from qgis.core import (QgsProcessing,
                        QgsProject,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink)
-
+import os
+from qgis.PyQt.QtGui import QIcon
 
 class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
     """
@@ -332,3 +333,21 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return KoalaNxSpeedAlgorithm()
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
+
+    def shortHelpString(self):
+        return "도움말----"
+        # return "<b>General:</b><br>" \
+        #        "This algorithm implements OD-Matrix analysis to return the <b>matrix of origin-destination pairs as table yielding network based costs</b> on a given <b>network dataset between two layer of points (m:n)</b>.<br>" \
+        #        "It accounts for <b>points outside of the network</b> (eg. <i>non-network-elements</i>). Distances are measured accounting for <b>ellipsoids</b>, entry-, exit-, network- and total costs are listed in the result attribute-table.<br><br>" \
+        #        "<b>Parameters (required):</b><br>" \
+        #        "Following Parameters must be set to run the algorithm:" \
+        #        "<ul><li>Network Layer</li><li>From-Point Layer</li><li>Unique From-Point ID Field (numerical)</li><li>To-Point Layer</li><li>Unique To-Point ID Field (numerical)</li><li>Cost Strategy</li></ul><br>" \
+        #        "<b>Parameters (optional):</b><br>" \
+        #        "There are also a number of <i>optional parameters</i> to implement <b>direction dependent</b> shortest paths and provide information on <b>speeds</b> on the networks edges." \
+        #        "<ul><li>Direction Field</li><li>Value for forward direction</li><li>Value for backward direction</li><li>Value for both directions</li><li>Default direction</li><li>Speed Field</li><li>Default Speed (affects entry/exit costs)</li><li>Topology tolerance</li></ul><br>" \
+        #        "<b>Output:</b><br>" \
+        #        "The output of the algorithm is one table:" \
+        #        "<ul><li>OD-Matrix as table with network based distances as attributes</li></ul>"

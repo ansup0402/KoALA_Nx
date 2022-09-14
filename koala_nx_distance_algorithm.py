@@ -43,7 +43,8 @@ from qgis.core import (QgsProcessing,
                        QgsProject,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink)
-
+import os
+from qgis.PyQt.QtGui import QIcon
 
 class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
     """
@@ -332,3 +333,9 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
 
     def createInstance(self):
         return KoalaNxDistanceAlgorithm()
+
+    def icon(self):
+        return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
+
+    def shortHelpString(self):
+        return "도움말----"

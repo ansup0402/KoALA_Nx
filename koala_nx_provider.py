@@ -31,6 +31,8 @@ __copyright__ = '(C) 2022 by Hyunjoong Kim'
 __revision__ = '$Format:%H$'
 from qgis.PyQt.QtCore import QSettings, QCoreApplication, QTranslator, qVersion
 from qgis.core import QgsProcessingProvider
+from qgis.PyQt.QtGui import QIcon
+
 from .koala_nx_distance_algorithm import KoalaNxDistanceAlgorithm
 from .koala_nx_speed_algorithm import KoalaNxSpeedAlgorithm
 
@@ -110,7 +112,8 @@ class KoalaNxProvider(QgsProcessingProvider):
         Should return a QIcon which is used for your provider inside
         the Processing toolbox.
         """
-        return QgsProcessingProvider.icon(self)
+        # return QgsProcessingProvider.icon(self)
+        return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
 
     def longName(self):
         """
