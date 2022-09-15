@@ -338,19 +338,19 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
 
     def shortHelpString(self):
-
-        return "<b>KoALA-Nx 도움말 등 설명...----</b><br>" \
-                + self.tr("KoALA-Nx supports optimal network analysis in various network environments. Users can apply the tool in all network environments, such as roads, railroads, and pedestrians. KoALA-Nx provides two functions: distance-based network analysis and time-based network analysis.") \
-                + "<br>Speed Field : If the speed value is zero, it is replaced by the minimum value"
-        # return "<b>General:</b><br>" \
-        #        "This algorithm implements OD-Matrix analysis to return the <b>matrix of origin-destination pairs as table yielding network based costs</b> on a given <b>network dataset between two layer of points (m:n)</b>.<br>" \
-        #        "It accounts for <b>points outside of the network</b> (eg. <i>non-network-elements</i>). Distances are measured accounting for <b>ellipsoids</b>, entry-, exit-, network- and total costs are listed in the result attribute-table.<br><br>" \
-        #        "<b>Parameters (required):</b><br>" \
-        #        "Following Parameters must be set to run the algorithm:" \
-        #        "<ul><li>Network Layer</li><li>From-Point Layer</li><li>Unique From-Point ID Field (numerical)</li><li>To-Point Layer</li><li>Unique To-Point ID Field (numerical)</li><li>Cost Strategy</li></ul><br>" \
-        #        "<b>Parameters (optional):</b><br>" \
-        #        "There are also a number of <i>optional parameters</i> to implement <b>direction dependent</b> shortest paths and provide information on <b>speeds</b> on the networks edges." \
-        #        "<ul><li>Direction Field</li><li>Value for forward direction</li><li>Value for backward direction</li><li>Value for both directions</li><li>Default direction</li><li>Speed Field</li><li>Default Speed (affects entry/exit costs)</li><li>Topology tolerance</li></ul><br>" \
-        #        "<b>Output:</b><br>" \
-        #        "The output of the algorithm is one table:" \
-        #        "<ul><li>OD-Matrix as table with network based distances as attributes</li></ul>"
+        return "<b>출발 레이어의 개별 노드에서 도착 레이어의 모든 노드까지의 네트워크 거리를 시간 기준으로 분석하여 합산한 결과를 보여줍니다.</b><br>" \
+               "<br><b>파라미터:</b>" \
+               "<ul style=\"line-height:500%\">" \
+               "<li>출발레이어 : 네트워크 분석을 원하는 대상 지역이 표기된 포인트 레이어</li>" \
+               "<li>도착레이어 : 분석 지점에서 네트워크 분석을 하고자 하는 모든 대상 지점이 포함된 포인트 레이어</li>" \
+               "<li>노드레이어 :  네트워크 분석을 위한 기초 노드레이어</li>" \
+               "<li>노드ID필드 : 노드 레이어의 ID값이 저장되어 있는 필드 </li>" \
+               "<li>링크레이어 : 네트워크 분석을 위한 기초 링크레이어</li>" \
+               "<li>통행방향 : 선택한 링크 레이어의 링크 유형(단방향/양방향)</li>" \
+               "<li>기점 : 링크의 양쪽 끝 노드 중 시작 지점의 노드ID값이 저장되어 있는 필드</li>" \
+               "<li>종점 : 링크의 양쪽 끝 노드 중 정료 지점의 노드ID값이 저장되어 있는 필드</li>" \
+               "<li>거리필드 : 링크의 거리(길이) 값이 저장되어 있는 필드(단위 m)</li>" \
+               "<li>속도 : 개별 링크 구간에 대한 최대 속도가 저장되어 있는 필드(단위 km/h)</li>" \
+               "</ul>" \
+               "※ 네트워크 분석시 출발/도착 지점의 최근린 노드를 기반으로 분석하며, 개별 지점과 최근린 노드까지의 거리는 직선거리 기준으로 산정합니다.<br>" \
+               "※ 속도 필드에 0값 또는 값이 없는 경우 필드 값 중 최소값으로 대체하여 계산됩니다."

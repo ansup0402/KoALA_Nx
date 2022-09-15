@@ -132,9 +132,6 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
                 optional=False)
         )
 
-
-
-
         # 노드레이어
         self.addParameter(
             QgsProcessingParameterVectorLayer(
@@ -338,4 +335,17 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
 
     def shortHelpString(self):
-        return "도움말----"
+        return "<b>출발 레이어의 개별 노드에서 도착 레이어의 모든 노드까지의 네트워크 거리를 분석하여 합산한 결과를 보여줍니다.</b><br>" \
+               "<br><b>파라미터:</b>" \
+               "<ul style=\"line-height:500%\">" \
+               "<li>출발레이어 : 네트워크 분석을 원하는 대상 지역이 표기된 포인트 레이어</li>" \
+               "<li>도착레이어 : 분석 지점에서 네트워크 분석을 하고자 하는 모든 대상 지점이 포함된 포인트 레이어</li>"\
+               "<li>노드레이어 :  네트워크 분석을 위한 기초 노드레이어</li>" \
+               "<li>노드ID필드 : 노드 레이어의 ID값이 저장되어 있는 필드 </li>" \
+               "<li>링크레이어 : 네트워크 분석을 위한 기초 링크레이어</li>" \
+               "<li>링크유형 : 선택한 링크 레이어의 링크 유형(단방향/양방향)</li>" \
+               "<li>기점 : 링크의 양쪽 끝 노드 중 시작 지점의 노드ID값이 저장되어 있는 필드</li>" \
+               "<li>종점 : 링크의 양쪽 끝 노드 중 정료 지점의 노드ID값이 저장되어 있는 필드</li>" \
+               "<li>거리필드 : 링크의 거리(길이) 값이 저장되어 있는 필드(단위 m)</li>" \
+               "</ul>" \
+               "<b>※ 네트워크 분석시 출발/도착 지점의 최근린 노드를 기반으로 분석하며, 개별 지점과 최근린 노드까지의 거리는 직선거리 기준으로 산정합니다.</b>"
