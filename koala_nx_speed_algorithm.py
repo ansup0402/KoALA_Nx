@@ -118,7 +118,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.IN_SOURCELYR,
-                "❖ " + self.tr('Source Layer'),
+                "❖ " + self.tr('Origin Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
@@ -127,7 +127,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.IN_TARGETLYR,
-                "❖ " + self.tr('Target Layer'),
+                "❖ " + self.tr('Destination Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
@@ -148,7 +148,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_NODE_ID,
-                self.tr('Node ID FIELD'),
+                self.tr('Unique Field'),
                 None,
                 self.IN_NODE,
                 QgsProcessingParameterField.Any,
@@ -177,7 +177,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_FNODE,
-                self.tr('Origin field'),
+                self.tr('From Node'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -187,7 +187,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_TNODE,
-                self.tr('Destination field'),
+                self.tr('To Node'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -197,7 +197,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_LENGTH,
-                self.tr('Link Distance Field'),
+                self.tr('Distance Field'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -206,7 +206,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_SPEED,
-                self.tr('Speed Field : If the speed value is zero, it is replaced by the minimum value'),
+                self.tr('Speed Field'),         # If the speed value is zero, it is replaced by the minimum value
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -299,7 +299,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return '네트워크분석(speed&distance)'
+        return self.tr('time-based network analysis')
 
     # 툴 이름
     def displayName(self):
@@ -326,10 +326,10 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'KoALA-Nx'
+        return self.tr('KoALA-Nx')
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return KoalaNxSpeedAlgorithm()
@@ -338,7 +338,10 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         return QIcon(os.path.join(os.path.split(os.path.dirname(__file__))[0], 'KoALA_Nx/icons', 'icon_koala.ico'))
 
     def shortHelpString(self):
-        return "도움말----"
+
+        return "<b>KoALA-Nx 도움말 등 설명...----</b><br>" \
+                + self.tr("KoALA-Nx supports optimal network analysis in various network environments. Users can apply the tool in all network environments, such as roads, railroads, and pedestrians. KoALA-Nx provides two functions: distance-based network analysis and time-based network analysis.") \
+                + "<br>Speed Field : If the speed value is zero, it is replaced by the minimum value"
         # return "<b>General:</b><br>" \
         #        "This algorithm implements OD-Matrix analysis to return the <b>matrix of origin-destination pairs as table yielding network based costs</b> on a given <b>network dataset between two layer of points (m:n)</b>.<br>" \
         #        "It accounts for <b>points outside of the network</b> (eg. <i>non-network-elements</i>). Distances are measured accounting for <b>ellipsoids</b>, entry-, exit-, network- and total costs are listed in the result attribute-table.<br><br>" \

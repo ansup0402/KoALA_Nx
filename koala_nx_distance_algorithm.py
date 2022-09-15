@@ -118,7 +118,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.IN_SOURCELYR,
-                "❖ " + self.tr('Source Layer'),
+                "❖ " + self.tr('Origin Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
@@ -127,7 +127,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterVectorLayer(
                 self.IN_TARGETLYR,
-                "❖ " + self.tr('Target Layer'),
+                "❖ " + self.tr('Destination Layer'),
                 [QgsProcessing.TypeVectorPoint],
                 optional=False)
         )
@@ -148,7 +148,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_NODE_ID,
-                self.tr('Node ID FIELD'),
+                self.tr('Unique Field'),
                 None,
                 self.IN_NODE,
                 QgsProcessingParameterField.Any,
@@ -177,7 +177,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_FNODE,
-                self.tr('Origin field'),
+                self.tr('From Node'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -187,7 +187,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_TNODE,
-                self.tr('Destination field'),
+                self.tr('To Node'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Any,
@@ -197,7 +197,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         self.addParameter(
             QgsProcessingParameterField(
                 self.IN_LINK_LENGTH,
-                self.tr('Link Distance Field'),
+                self.tr('Distance Field'),
                 None,
                 self.IN_LINK,
                 QgsProcessingParameterField.Numeric,
@@ -299,7 +299,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return '네트워크분석(distance)'
+        return self.tr('distance-based network analysis')
 
     # 툴 이름
     def displayName(self):
@@ -326,10 +326,10 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         contain lowercase alphanumeric characters only and no spaces or other
         formatting characters.
         """
-        return 'KoALA-Nx'
+        return self.tr('KoALA-Nx')
 
     def tr(self, string):
-        return QCoreApplication.translate('Processing', string)
+        return QCoreApplication.translate('koala', string)
 
     def createInstance(self):
         return KoalaNxDistanceAlgorithm()

@@ -5,7 +5,7 @@
 [general]
 name=KoALA Nx
 qgisMinimumVersion=3.10
-description=KoALA Nx
+description=KoALA-Nx supports optimal network analysis in various network environments. Users can apply the tool in all network environments, such as roads, railroads, and pedestrians. KoALA-Nx provides two functions: distance-based network analysis and time-based network analysis
 version=0.1
 author=Hyunjoong Kim
 email=khj1122452@gmail.com

@@ -30,9 +30,9 @@ import tempfile
 import pickle
 
 
-from processing.core.Processing import Processing
-Processing.initialize()
-import processing
+# from processing.core.Processing import Processing
+# Processing.initialize()
+# import processing
 
 class koala_model:
 
@@ -502,7 +502,7 @@ class koala_model:
 
             # 최단거리 분석
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
-            targetshortest = {idx: val for idsingle_source_dijkstra_path_lengthx, val in shortest.items() if (idx in targetNodelist)}
+            targetshortest = {idx: val for idx, val in shortest.items() if (idx in targetNodelist)}
             shortestDistsum = sum(targetshortest.values())
 
             # if self.debugging: self.setProgressSubMsg("[debug] targetshortest : {}, shortestDistsum : {}".format(targetshortest, shortestDistsum))
