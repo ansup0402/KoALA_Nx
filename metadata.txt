@@ -10,24 +10,23 @@ version=0.1
 author=Hyunjoong Kim
 email=khj1122452@gmail.com
 
-about=Provide a brief description of the plugin and its purpose.
+about=KoALA-Nx supports optimal network analysis in various network environments. Users can apply the tool in all network environments, such as roads, railroads, and pedestrians. KoALA-Nx provides two functions: distance-based network analysis and time-based network analysis
 
-tracker=http://bugs
-repository=http://repo
+homepage=https://github.com/ansup0402/KoALA_Nx
+tracker=https://github.com/ansup0402/KoALA_Nx/issues
+repository=https://github.com/ansup0402/KoALA_Nx
 # End of mandatory metadata
 
 # Recommended items:
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-# changelog=
+# changelog=initial deployment
 
 # Tags are comma separated with spaces allowed
-tags=python
-
-homepage=http://homepage
+tags=python, network, Korea, accessibility
 category=Analysis
-icon=icon.png
+icon=./icons/icon_koala.png
 # experimental flag
 experimental=True
 
@@ -40,7 +39,7 @@ deprecated=False
 # plugin_dependencies=
 
 Category of the plugin: Raster, Vector, Database or Web
-# category=
+# category=Analysis
 
 # If the plugin can run on QGIS Server.
 server=False
