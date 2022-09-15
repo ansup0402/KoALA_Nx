@@ -1,7 +1,7 @@
 #/***************************************************************************
-# KoalaNetwork
+# KoALA
 #
-# KoALA Network
+# KoALA-Nx
 #							 -------------------
 #		begin				: 2022-09-06
 #		git sha				: $Format:%H$
@@ -40,7 +40,7 @@ SOURCES = \
 	__init__.py \
 	koala_nx.py 
 
-PLUGINNAME = koala_network
+PLUGINNAME = KoALA_Nx
 
 PY_FILES = \
 	__init__.py \
