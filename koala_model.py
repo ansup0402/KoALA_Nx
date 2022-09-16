@@ -336,9 +336,9 @@ class koala_model:
 
     # NX+"NODE 값" : taget지점에서 최근린 노드까지 임의로 추가한 node, edge 정보임
     def addnearestNodeEdgeAsTargetlayer(self):
+        isError = False
         i = 0
         totalcnt = 0
-        minimumSpeed = self.__minSpeed
         fnodes = []
         tnodes = []
         weights = []
@@ -348,24 +348,32 @@ class koala_model:
             if self.feedback.isCanceled(): return None
             self.feedback.setProgress(int(i / totalcnt * 100))
 
-            # tempNodes.append(feature.attribute(self.__nodeID))
-            # tempNodes.append(feature.attribute(self.__toNodefield))
-
             fnodes.append(feature.attribute(self.__nodeID))
             tnodes.append("NX"+feature.attribute(self.__nodeID))
-            length = feature.attribute("HubDist")
 
-            if self.__linkSpeed is None:
-                weights.append(length)
-            else:
-                speed = minimumSpeed
-                linktime = length / 1000 / speed
-                weights.append(linktime)
+            targetnearNodeDist = 0
+            if not isError:                                                 # 한번 오류가 발생 하면, 모든 값이 오류 이기 때문에 다시 확인할 필요 없음
+                length = feature.attribute("HubDist")
+                try:
+                    tmp = int(length)
+                    if self.__linkSpeed is None:
+                        targetnearNodeDist = length
+                    else:
+                        if length != 0:
+                            targetnearNodeDist = length / 1000 / self.__minSpeed
+                except:
+                    isError = True
+
+            weights.append(targetnearNodeDist)
 
         allnodes = list(set(tnodes))
         tmplink = tuple(zip(fnodes, tnodes, weights))
         self.nxGraph.add_nodes_from(allnodes)
         self.nxGraph.add_weighted_edges_from(tmplink)
+
+        if isError:
+            self.setProgressSubMsg("입력한 레이어에 예상치 못한 문제가 발생하여, 분석 지점에서 인근 노드까지의 직선거리는 계산에서 제외됩니다.(도착레이어, 좌표계 설정 오류 추정)")
+
 
         return self.nxGraph
 
@@ -483,8 +491,9 @@ class koala_model:
         # NX+"NODEID" 필드: taget지점에서 최근린 노드까지 임의로 추가한 node, edge 정보임
         tmptargetNodelist = [feature.attribute(targetNodefid) for feature in self.__targetlayer.getFeatures()]
         targetNodelist = list(map(lambda x: "NX" + str(x), tmptargetNodelist))
-        # if self.debugging: self.setProgressSubMsg("[debug] targetNodelist : {}".format(targetNodelist))
+        if self.debugging: self.setProgressSubMsg("[debug] targetNodelist : {}".format("도착레이어 선별 완료"))
 
+        isError = False
         i = 0
         totalcnt = sourcelayer.featureCount()
         for feature in sourcelayer.getFeatures():
@@ -493,19 +502,34 @@ class koala_model:
             self.feedback.setProgress(int(i / totalcnt * 100))
 
             sourceNodeId = feature[sourceNodefid]
-            tmpsourcenearNodeDist = feature['HubDist']
 
-            if self.__linkSpeed is None:
-                sourcenearNodeDist = tmpsourcenearNodeDist
-            else:
-                sourcenearNodeDist = tmpsourcenearNodeDist / 1000 / self.__minSpeed
+            # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준)
+            if totalcnt > 1000 or self.debugging:
+                self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
+
+            sourcenearNodeDist = 0
+            if not isError:
+                tmpsourcenearNodeDist = feature['HubDist']
+                try:
+                    tmp = int(tmpsourcenearNodeDist)
+                    if self.__linkSpeed is None:
+                        sourcenearNodeDist = tmpsourcenearNodeDist
+                    else:
+                        if tmpsourcenearNodeDist != 0:
+                            sourcenearNodeDist = tmpsourcenearNodeDist / 1000 / self.__minSpeed
+                except:
+                    isError = True
 
             # 최단거리 분석
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
-            targetshortest = {idx: val for idx, val in shortest.items() if (idx in targetNodelist)}
-            shortestDistsum = sum(targetshortest.values())
 
-            # if self.debugging: self.setProgressSubMsg("[debug] targetshortest : {}, shortestDistsum : {}".format(targetshortest, shortestDistsum))
+            # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(list.index를 이용한 방법이 속도가 약간 더 빠름)
+            # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
+            targetshortest = (val for idx, val in shortest.items() if (self.existList(targetNodelist, idx)))
+            shortestDistsum = sum(targetshortest)
+
+            self.setProgressSubMsg(shortestDistsum)
+
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
 
@@ -519,8 +543,16 @@ class koala_model:
             tempexcel = os.path.join(self.workpath, 'source_network.csv')
             self.__networkSum.to_csv(tempexcel)
 
+        if isError:
+            self.setProgressSubMsg("입력한 레이어에 예상치 못한 문제가 발생하여, 분석 지점에서 인근 노드까지의 직선거리는 계산에서 제외됩니다.(출발 레이어, 좌표계 설정 오류 추정)")
+
         return self.__networkSum
 
-
+    def existList(self, list, item):
+        try:
+            list.index(item)
+            return True
+        except:
+            return False
 
 
