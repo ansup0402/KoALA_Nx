@@ -528,8 +528,6 @@ class koala_model:
             targetshortest = (val for idx, val in shortest.items() if (self.existList(targetNodelist, idx)))
             shortestDistsum = sum(targetshortest)
 
-            self.setProgressSubMsg(shortestDistsum)
-
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
 
