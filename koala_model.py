@@ -525,6 +525,7 @@ class koala_model:
 
             # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(list.index를 이용한 방법이 속도가 약간 더 빠름)
             # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
+            # shortestDistsum = shortest_onlytarget(shorest, targetNodelist) : 함수 구현 하여 아래 코드와 속도 비교 필요
             targetshortest = (val for idx, val in shortest.items() if (self.existList(targetNodelist, idx)))
             shortestDistsum = sum(targetshortest)
 
