@@ -523,6 +523,8 @@ class koala_model:
             # 최단거리 분석
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
 
+        ###### 성능에 영향을 가장 많이 미치는 구간
+            if self.debugging: self.setProgressSubMsg("[debug] 출발({}) : 지정된 도착 레이어까지만 최단거리 재계산 시작".format(sourceNodeId))
             # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(list.index를 이용한 방법이 속도가 약간 더 빠름)
             # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
             # shortestDistsum = shortest_onlytarget(shorest, targetNodelist) : 함수 구현 하여 아래 코드와 속도 비교 필요
