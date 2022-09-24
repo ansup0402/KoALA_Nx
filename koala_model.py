@@ -13,6 +13,7 @@
 *                           [추가] addnearestNodeEdgeAsTargetlayer : 도착점의 최근린 노드까지의 거리 정보 추가
 *                           [추가] calMinSpeedinLinklayer : 최저 속도 공통활용 위해 별도 분리(지점->노드, 속도누락링크)
 *                           [createNodeEdgeInGraph] 속도 기반 분석시 단위를 km로 수정(/1000)
+*                           [setProgressSubMsg] microsecond 적용
 *                           [__init__] 변수 추가, 관련 property 추가
 *                         ...
 *
