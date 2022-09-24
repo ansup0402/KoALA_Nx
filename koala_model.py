@@ -148,7 +148,7 @@ class koala_model:
         now = datetime.datetime.now()
 
         # snow = "%04d-%02d-%02d %02d:%02d:%02d:%02d" % (now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
-        snow = "%04d-%02d-%02d %02d:%02d:%02d" % (now.year, now.month, now.day, now.hour, now.minute, now.second)
+        snow = "%04d-%02d-%02d %02d:%02d:%02d:%06d" % (now.year, now.month, now.day, now.hour, now.minute, now.second, now.microsecond)
         # self.feedback.pushInfo("%s..........  %s" % (snow, msg))
         self.feedback.pushDebugInfo("%s..........  %s" % (snow, msg))
         # self.feedback.pushConsoleInfo(msg)
@@ -504,7 +504,7 @@ class koala_model:
             sourceNodeId = feature[sourceNodefid]
 
             # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준)
-            if totalcnt > 1000 or self.debugging:
+            if totalcnt > 1000:
                 self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
 
             sourcenearNodeDist = 0
@@ -524,12 +524,23 @@ class koala_model:
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
 
         ###### 성능에 영향을 가장 많이 미치는 구간
-            if self.debugging: self.setProgressSubMsg("[debug] 출발({}) : 지정된 도착 레이어까지만 최단거리 재계산 시작".format(sourceNodeId))
-            # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(list.index를 이용한 방법이 속도가 약간 더 빠름)
+            if self.debugging: self.setProgressSubMsg("[debug-{}/{}] 출발({}) : 지정된 도착 레이어까지만 최단거리 재계산 시작".format(i, totalcnt,sourceNodeId))
+            # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(속도 : 방법1 > 방법2 > 방법3) : 향후 참고용으로 주석으로 남겨둠
+            # 방법1)
             # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
             # shortestDistsum = shortest_onlytarget(shorest, targetNodelist) : 함수 구현 하여 아래 코드와 속도 비교 필요
-            targetshortest = (val for idx, val in shortest.items() if (self.existList(targetNodelist, idx)))
-            shortestDistsum = sum(targetshortest)
+
+            # 방법2)
+            # targetshortest = (val for idx, val in shortest.items() if (self.existList(targetNodelist, idx)))
+            # shortestDistsum = sum(targetshortest)
+
+            # 방법3)
+            shortestDistsum = 0
+            for targetNode in targetNodelist:
+                try:
+                    shortestDistsum += shortest[targetNode]
+                except KeyError:
+                    pass
 
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
