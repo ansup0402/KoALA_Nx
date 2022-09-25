@@ -21,7 +21,9 @@ repository=https://github.com/ansup0402/KoALA_Nx
 
 hasProcessingProvider=yes
 # Uncomment the following line and add your changelog:
-# changelog=initial deployment
+changelog=0.1.1:
+    - fixed bugs
+    - speed improvement
 
 # Tags are comma separated with spaces allowed
 tags=python, network, Korea, accessibility
