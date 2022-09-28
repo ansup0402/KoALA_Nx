@@ -42,7 +42,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterNumber,
                        QgsProject,
                        QgsProcessingParameterString,
-                       QgsProcessingParameterFeatureSink)
+                       QgsProcessingParameterFeatureSink,
+                       QgsProcessingParameterBoolean,
+                       QgsProcessingParameterFileDestination)
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -77,6 +79,14 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
     IN_LINK_TNODE = 'IN_LINK_TNODE'
     IN_LINK_LENGTH = 'IN_LINK_LENGTH'
     IN_LINK_SPEED = 'IN_LINK_SPEED'
+    
+    # 개별 목적지 까지의 최단 거리 분석 결가
+    IN_ISDIVISUAL = 'IN_ISDIVISUAL'
+    IN_SOURCENAMEFIELD = 'IN_SOURCENAMEFIELD'
+    IN_TARGETNAMEFIELD = 'IN_TARGETNAMEFIELD'
+    OUT_CSV = 'OUT_CSV'
+
+
     OUTPUT = 'OUTPUT'
 
 
@@ -213,6 +223,55 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
                 optional=False)
         )
 
+
+
+        # 개별 목적지 까지의 최단 거리 분석 결가
+        paramIsIndivisual = QgsProcessingParameterBoolean(
+            name=self.IN_ISDIVISUAL,
+            description=self.tr("Distance to individual destinations"),
+            defaultValue=False,
+            optional=False)
+
+        paramIsIndivisual.setFlags(paramIsIndivisual.flags() | paramIsIndivisual.FlagAdvanced)
+        self.addParameter(paramIsIndivisual)
+
+        paramSrcName = QgsProcessingParameterField(
+            name=self.IN_SOURCENAMEFIELD,
+            description=self.tr('Name field of Origin layer'),
+            defaultValue=False,
+            parentLayerParameterName=self.IN_SOURCELYR,
+            type=QgsProcessingParameterField.String,
+            optional=True)
+
+        paramSrcName.setFlags(paramSrcName.flags() | paramSrcName.FlagAdvanced)
+        self.addParameter(paramSrcName)
+
+
+        paramTarName = QgsProcessingParameterField(
+            name=self.IN_TARGETNAMEFIELD,
+            description=self.tr('Name field of Destination layer'),
+            defaultValue=False,
+            parentLayerParameterName=self.IN_TARGETLYR,
+            type=QgsProcessingParameterField.String,
+            optional=True)
+
+        paramTarName.setFlags(paramTarName.flags() | paramTarName.FlagAdvanced)
+        self.addParameter(paramTarName)
+
+
+        paramOutCSV = QgsProcessingParameterFileDestination(
+            name=self.OUT_CSV,
+            description=self.tr('CSV Output'),
+            defaultValue=None,
+            fileFilter='Comma Separated Values (*.csv)',
+            createByDefault=False,
+            optional=True)
+        paramOutCSV.checkValueIsAcceptable = False
+
+        paramOutCSV.setFlags(paramOutCSV.flags() | paramOutCSV.FlagAdvanced)
+        self.addParameter(paramOutCSV)
+
+
         # 최종 결과
         self.addParameter(
             QgsProcessingParameterVectorDestination(
@@ -254,19 +313,55 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         else:
             keyword['IN_LINK_SPEED'] = self.parameterAsFields(parameters, self.IN_LINK_SPEED, context)[0]
 
+
+        #################################### 개별 목적지 까지의 최단 거리 분석 결과 ####################################
+        keyword['IN_ISDIVISUAL'] = self.parameterAsBoolean(parameters, self.IN_ISDIVISUAL, context)
+        keyword['IN_SOURCENAMEFIELD'] = self.parameterAsFields(parameters, self.IN_SOURCENAMEFIELD, context)[0]
+        keyword['IN_TARGETNAMEFIELD'] = self.parameterAsFields(parameters, self.IN_TARGETNAMEFIELD, context)[0]
+        # keyword['OUT_CSV'] = self.parameterAsFileOutput(parameters, self.OUT_CSV, context)
+        # keyword['OUT_CSV'] = parameters(self.OUT_CSV)
+        # keyword['OUT_CSV'] = self.parameterDefinition('OUT_CSV')
+        try:
+            keyword['OUT_CSV'] = self.parameterDefinition('OUT_CSV').valueAsPythonString(parameters['OUT_CSV'], context)
+        except KeyError:
+            keyword['OUT_CSV'] = None
+        #########################################################################################################
+
+
         keyword['OUTPUT'] = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
 
         return keyword
 
     def check_userinput(self, parameters):
-        # 사용자가 자주 실수하는 부분 파악하여 해당 함수 완성 할 것
+
         isvailid = True
-        return isvailid
+        errMsg = ""
+
+        if parameters['IN_ISDIVISUAL'] == True:
+            if parameters['IN_SOURCENAMEFIELD'] == "false":
+                if errMsg != "": errMsg += "\n"
+                errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('Name field of Origin layer'))
+                isvailid = False
+            if parameters['IN_TARGETNAMEFIELD'] == "false":
+                if errMsg != "": errMsg += "\n"
+                errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('Name field of Destination layer'))
+                isvailid = False
+            if parameters['OUT_CSV'] == None:
+                if errMsg != "": errMsg += "\n"
+                errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('CSV Output'))
+                isvailid = False
+
+        return isvailid, errMsg
 
     def processAlgorithm(self, parameters, context, feedback):
         params = self.parameter2Dict(parameters, context)
-
-        if self.check_userinput(parameters=params) == False: return None
+        isValid, msg = self.check_userinput(parameters=params)
+        if isValid == False:
+            feedback.pushInfo("========================================================")
+            feedback.reportError("분석을 실패하였습니다.  올바른 입력 값을 선택 후 다시 시도 하세요.")
+            feedback.reportError(msg, True)
+            feedback.pushInfo("========================================================")
+            return {self.OUTPUT: None}
 
         try:
             from .koala_nx_launcher import koala_nx_launcher
