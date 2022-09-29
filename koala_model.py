@@ -54,6 +54,7 @@ class koala_model:
         self.__sourcelayer = None
         self.__targetlayer = None
         self.__networkSum = None
+        self.__networkIndivisual = None
 
         self.allshortestnodes = {}
         self.nxGraph = None
@@ -65,8 +66,37 @@ class koala_model:
         self.__linklenfield = ''
         self.__linkSpeed = None
 
+        self.__isIndividual = False
+        self.__namefidsourcelyr = None
+        self.__namefidtargetlyr = None
+
         self.__minSpeed = 0
         self.__classify_count = 10
+
+    @property
+    def includeIndivisualShortest(self):
+        return (self.__isIndividual)
+
+    @includeIndivisualShortest.setter
+    def includeIndivisualShortest(self, value):
+        self.__isIndividual = value
+
+    @property
+    def namefieldofsourcelayer(self):
+        return (self.__namefidsourcelyr)
+
+    @namefieldofsourcelayer.setter
+    def namefieldofsourcelayer(self, value):
+        self.__namefidsourcelyr = value
+
+    @property
+    def namefieldoftargetlayer(self):
+        return (self.__namefidtargetlyr)
+
+    @namefieldoftargetlayer.setter
+    def namefieldoftargetlayer(self, value):
+        self.__namefidtargetlyr = value
+
 
     @property
     def targetlayer(self):
@@ -480,9 +510,11 @@ class koala_model:
     def anal_NetworkSum(self):
 
         sourceNodefid = self.__nodeID
-        sourceNodeDistfid = 'HubDist'
+        sourceNodeName = self.__namefidsourcelyr
+        # sourceNodeDistfid = 'HubDist'
         targetNodefid = self.__nodeID
-        targetNodeDistfid = 'HubDist'
+        targetNodeName = self.__namefidtargetlyr
+        # targetNodeDistfid = 'HubDist'
 
         listsourceNodeID = []
         listShortestSum = []
@@ -490,8 +522,15 @@ class koala_model:
         sourcelayer = self.__sourcelayer
 
         # NX+"NODEID" 필드: taget지점에서 최근린 노드까지 임의로 추가한 node, edge 정보임
-        tmptargetNodelist = [feature.attribute(targetNodefid) for feature in self.__targetlayer.getFeatures()]
-        targetNodelist = list(map(lambda x: "NX" + str(x), tmptargetNodelist))
+        # tmptargetNodelist = None
+        dicttargetNodeName = None
+        if self.__isIndividual:
+            dicttargetNodeName = {"NX" + str(feature.attribute(targetNodefid)): feature.attribute(targetNodeName) for feature in self.__targetlayer.getFeatures()}
+            targetNodelist = dicttargetNodeName.keys()
+        else:
+            tmptargetNodelist = [feature.attribute(targetNodefid) for feature in self.__targetlayer.getFeatures()]
+            targetNodelist = list(map(lambda x: "NX" + str(x), tmptargetNodelist))
+
         if self.debugging: self.setProgressSubMsg("[debug] targetNodelist : {}".format("도착레이어 선별 완료"))
 
         isError = False
@@ -503,7 +542,7 @@ class koala_model:
             self.feedback.setProgress(int(i / totalcnt * 100))
 
             sourceNodeId = feature[sourceNodefid]
-
+            sourceNodeName = feature[self.__namefidsourcelyr]
             # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준)
             if totalcnt > 1000:
                 self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
@@ -540,6 +579,15 @@ class koala_model:
             for targetNode in targetNodelist:
                 try:
                     shortestDistsum += shortest[targetNode]
+                    if self.__isIndividual:
+                        if self.debugging: self.setProgressSubMsg(
+                            "[{}({})-{}({}) : {}m".format(sourceNodeName, sourceNodeId, dicttargetNodeName[targetNode], targetNode, shortest[targetNode]))
+                        # 개별 분석 값 추가
+                        # 여기서 self.__networkIndivisual 만들기
+                        # tmp["Start Node"] = sourceNodeName
+                        # tmp["Sum of Shorest"] = shortest[targetNode]
+                        # tmp[dicttargetNodeName[targetNode]] = shortest[targetNode]
+
                 except KeyError:
                     pass
 
@@ -559,7 +607,7 @@ class koala_model:
         if isError:
             self.setProgressSubMsg("입력한 레이어에 예상치 못한 문제가 발생하여, 분석 지점에서 인근 노드까지의 직선거리는 계산에서 제외됩니다.(출발 레이어, 좌표계 설정 오류 추정)")
 
-        return self.__networkSum
+        return self.__networkSum, self.__networkIndivisual
 
     def existList(self, list, item):
         try:

@@ -164,8 +164,19 @@ class koala_nx_launcher:
                                                    len(model.sourcelayer),
                                                    type(model.targetlayer),
                                                    len(model.targetlayer)))
+
+
         self.setDebugProgressMsg("anal_NetworkSum()...")
-        out = model.anal_NetworkSum()
+        model.includeIndivisualShortest = self.parameters['IN_ISDIVISUAL']
+        model.namefieldofsourcelayer = self.parameters['IN_SOURCENAMEFIELD']
+        model.namefieldoftargetlayer = self.parameters['IN_TARGETNAMEFIELD']
+
+        shortestSum, shortestIndividual = model.anal_NetworkSum()
+
+
+        if self.parameters['IN_ISDIVISUAL'] == True:
+            # CSV 저장
+            pass
 
 
         # 6. 분석 결과 저장
