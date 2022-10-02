@@ -44,7 +44,9 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink,
                        QgsProcessingParameterBoolean,
-                       QgsProcessingParameterFileDestination)
+                       QgsProcessingParameterFileDestination,
+                       QgsProcessingParameterFile,
+                       QgsProcessingParameterDefinition)
 import os
 from qgis.PyQt.QtGui import QIcon
 
@@ -268,8 +270,33 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
             optional=True)
         paramOutCSV.checkValueIsAcceptable = False
 
-        paramOutCSV.setFlags(paramOutCSV.flags() | paramOutCSV.FlagAdvanced)
+        paramOutCSV.setFlags(paramOutCSV.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
         self.addParameter(paramOutCSV)
+
+        # paramOutCSV = QgsProcessingParameterFile(
+        #     name=self.OUT_CSV,
+        #     description=self.tr('CSV Output'),
+        #     behavior=QgsProcessingParameterFile.File,
+        #     defaultValue=None,
+        #     fileFilter="csv files (*.csv)",
+        #     optional=True)
+        #
+        # paramOutCSV.setFlags(paramOutCSV.flags() | paramOutCSV.FlagAdvanced | paramOutCSV.FlagIsModelOutput)
+        # self.addParameter(paramOutCSV)
+        #
+        # self.addParameter(QgsProcessingParameterString('Finaloutput', 'finaloutput', 'C:/tmp/xy.csv'))
+
+        # paramOutCSV.checkValueIsAcceptable = False
+
+        # param = QgsProcessingParameterFile('out_csv', 'OUT_CSV', optional=True,
+        #                                    behavior=QgsProcessingParameterFile.File, fileFilter='CSV 파일 (*.csv)',
+        #                                    defaultValue=None)
+        # param.setFlags(param.flags() | QgsProcessingParameterDefinition.FlagAdvanced)
+        # self.addParameter(param)
+        #
+
+
+
 
 
         # 최종 결과
@@ -318,15 +345,12 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
         keyword['IN_ISDIVISUAL'] = self.parameterAsBoolean(parameters, self.IN_ISDIVISUAL, context)
         keyword['IN_SOURCENAMEFIELD'] = self.parameterAsFields(parameters, self.IN_SOURCENAMEFIELD, context)[0]
         keyword['IN_TARGETNAMEFIELD'] = self.parameterAsFields(parameters, self.IN_TARGETNAMEFIELD, context)[0]
-        # keyword['OUT_CSV'] = self.parameterAsFileOutput(parameters, self.OUT_CSV, context)
-        # keyword['OUT_CSV'] = parameters(self.OUT_CSV)
-        # keyword['OUT_CSV'] = self.parameterDefinition('OUT_CSV')
+
         try:
-            keyword['OUT_CSV'] = self.parameterDefinition('OUT_CSV').valueAsPythonString(parameters['OUT_CSV'], context)
+            keyword['OUT_CSV'] = self.parameterAsFileOutput(parameters, self.OUT_CSV, context)
         except KeyError:
             keyword['OUT_CSV'] = None
         #########################################################################################################
-
 
         keyword['OUTPUT'] = self.parameterAsOutputLayer(parameters, self.OUTPUT, context)
 
@@ -346,7 +370,7 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
                 if errMsg != "": errMsg += "\n"
                 errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('Name field of Destination layer'))
                 isvailid = False
-            if parameters['OUT_CSV'] == None:
+            if parameters['OUT_CSV'] == None or parameters['OUT_CSV'] == '':
                 if errMsg != "": errMsg += "\n"
                 errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('CSV Output'))
                 isvailid = False
@@ -355,6 +379,13 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
 
     def processAlgorithm(self, parameters, context, feedback):
         params = self.parameter2Dict(parameters, context)
+
+        if self.debugmode:
+            feedback.pushInfo("IN_SOURCENAMEFIELD : {}".format(params['IN_SOURCENAMEFIELD']))
+            feedback.pushInfo("IN_TARGETNAMEFIELD : {}".format(params['IN_TARGETNAMEFIELD']))
+            feedback.pushInfo("OUT_CSV : {}".format(params['OUT_CSV']))
+
+
         isValid, msg = self.check_userinput(parameters=params)
         if isValid == False:
             feedback.pushInfo("========================================================")

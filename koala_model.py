@@ -53,8 +53,8 @@ class koala_model:
         # 변수 추가(koala_nx용)
         self.__sourcelayer = None
         self.__targetlayer = None
-        self.__networkSum = None
-        self.__networkIndivisual = None
+        self.__networkSum = None                                # dataframe
+        self.__networkIndivisual = ''                           # string
 
         self.allshortestnodes = {}
         self.nxGraph = None
@@ -535,6 +535,9 @@ class koala_model:
 
         isError = False
         i = 0
+        shortestHearderList = []                                                                    # CSV HEADER : 개별 도착 노드까지의 거리 산정용
+        shortestValuesList = []                                                                     # CSV VALUES : 개별 도착 노드까지의 거리 산정용
+        csvString = ''                                                                              # CSV List : 내보내기 위한 최종 텍스트
         totalcnt = sourcelayer.featureCount()
         for feature in sourcelayer.getFeatures():
             i += 1
@@ -564,7 +567,7 @@ class koala_model:
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
 
         ###### 성능에 영향을 가장 많이 미치는 구간
-            if self.debugging: self.setProgressSubMsg("[debug-{}/{}] 출발({}) : 지정된 도착 레이어까지만 최단거리 재계산 시작".format(i, totalcnt,sourceNodeId))
+            if self.debugging: self.setProgressSubMsg("[debug-{}/{}] 출발({}) : 지정된 도착 레이어까지 최단거리 재계산 시작".format(i, totalcnt,sourceNodeId))
             # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(속도 : 방법1 > 방법2 > 방법3) : 향후 참고용으로 주석으로 남겨둠
             # 방법1)
             # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
@@ -577,26 +580,39 @@ class koala_model:
             # 방법3)
             shortestDistsum = 0
             for targetNode in targetNodelist:
+                shorest = 0
                 try:
-                    shortestDistsum += shortest[targetNode]
-                    if self.__isIndividual:
-                        if self.debugging: self.setProgressSubMsg(
-                            "[{}({})-{}({}) : {}m".format(sourceNodeName, sourceNodeId, dicttargetNodeName[targetNode], targetNode, shortest[targetNode]))
-                        # 개별 분석 값 추가
-                        # 여기서 self.__networkIndivisual 만들기
-                        # tmp["Start Node"] = sourceNodeName
-                        # tmp["Sum of Shorest"] = shortest[targetNode]
-                        # tmp[dicttargetNodeName[targetNode]] = shortest[targetNode]
+                    shorest = shortest[targetNode]
+                    shortestDistsum += shorest
 
                 except KeyError:
+                    shorest = 0
                     pass
+
+                if self.__isIndividual:
+                    if i == 1:
+                        if len(shortestHearderList) == 0:
+                            shortestHearderList.append("Starting point")
+                            shortestHearderList.append("Sum of Nx_Score")
+                            shortestHearderList.append("To Origin Node")
+                        shortestHearderList.append(dicttargetNodeName[targetNode])
+
+                    shortestValuesList.append(str(shorest))
 
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
 
+            if self.__isIndividual:
+                if i == 1:
+                    csvString = ','.join(map(str, shortestHearderList))
+                csvString += "\n" + sourceNodeName + ',' + str(shortestDistsum+sourcenearNodeDist) + ',' + str(sourcenearNodeDist) + ',' + ','.join(map(str, shortestValuesList))
+                shortestValuesList = []
+
+        if self.__isIndividual:
+            self.__networkIndivisual = csvString
+
         rawData = {sourceNodefid: listsourceNodeID,
                    "NX_WEIGHT": listShortestSum}
-
 
         self.__networkSum = pd.DataFrame(rawData)
 
