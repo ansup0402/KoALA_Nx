@@ -68,6 +68,22 @@
         <translation>거리 필드</translation>
     </message>
     <message>
+        <source>Distance to individual destinations</source>
+        <translation>모든 도착지 분석 여부</translation>
+    </message>
+    <message>
+        <source>Name field of Origin layer</source>
+        <translation>출발지 명칭 필드</translation>
+    </message>
+    <message>
+        <source>Name field of Destination layer</source>
+        <translation>도착지 명칭 필드</translation>
+    </message>
+    <message>
+        <source>CSV Output</source>
+        <translation>모든 도착지 분석 결과 저장 경로(csv)</translation>
+    </message>
+    <message>
         <source>Result</source>
         <translation>분석 결과</translation>
     </message>
