@@ -323,8 +323,6 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         errMsg = ""
 
         if parameters['IN_ISDIVISUAL'] == True:
-
-
             if parameters['IN_SOURCENAMEFIELD'] == "false":
                 if errMsg != "": errMsg += "\n"
                 errMsg += "다음 항목의 입력된 값을 확인하세요. : {}".format(self.tr('Name field of Origin layer'))
@@ -434,7 +432,7 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
                "<li>노드레이어 :  네트워크 분석을 위한 기초 노드레이어</li>" \
                "<li>노드ID필드 : 노드 레이어의 ID값이 저장되어 있는 필드 </li>" \
                "<li>링크레이어 : 네트워크 분석을 위한 기초 링크레이어</li>" \
-               "<li>링크유형 : 선택한 링크 레이어의 링크 유형(단방향/양방향)</li>" \
+               "<li>통행방향 : 선택한 링크 레이어의 링크 유형(단방향/양방향)</li>" \
                "<li>기점 : 링크의 양쪽 끝 노드 중 시작 지점의 노드ID값이 저장되어 있는 필드</li>" \
                "<li>종점 : 링크의 양쪽 끝 노드 중 종료 지점의 노드ID값이 저장되어 있는 필드</li>" \
                "<li>거리필드 : 링크의 거리(길이) 값이 저장되어 있는 필드(단위 m)</li>" \

@@ -605,6 +605,16 @@ class koala_model:
             if self.__isIndividual:
                 if i == 1:
                     csvString = ','.join(map(str, shortestHearderList))
+
+                if self.debugging:
+                    self.setProgressSubMsg("csvString type : {}".format(type(csvString)))
+                    self.setProgressSubMsg("sourceNodeName type : {}".format(type(sourceNodeName)))
+                    self.setProgressSubMsg("shortestDistsum type : {}".format(type(shortestDistsum)))
+                    self.setProgressSubMsg("sourcenearNodeDist type : {}".format(type(sourcenearNodeDist)))
+                    self.setProgressSubMsg("shortestValuesList type : {}".format(type(shortestValuesList)))
+
+                if sourceNodeName == None:
+                    sourceNodeName = "출발지 명칭 누락({})".format(sourceNodeId)
                 csvString += "\n" + sourceNodeName + ',' + str(shortestDistsum+sourcenearNodeDist) + ',' + str(sourcenearNodeDist) + ',' + ','.join(map(str, shortestValuesList))
                 shortestValuesList = []
 
