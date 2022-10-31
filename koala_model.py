@@ -52,6 +52,8 @@ class koala_model:
 
         # 변수 추가(koala_nx용)
         self.__sourcelayer = None
+        self.__sourceIDfid = None
+
         self.__targetlayer = None
         self.__networkSum = None                                # dataframe
         self.__networkIndivisual = ''                           # string
@@ -114,6 +116,16 @@ class koala_model:
     @sourcelayer.setter
     def sourcelayer(self, value):
         self.__sourcelayer = value
+
+    @property
+    def sourceIDfield(self):
+        return (self.__sourceIDfid)
+
+    @sourceIDfield.setter
+    def sourceIDfield(self, value):
+        self.__sourceIDfid = value
+
+
 
 
     @property
@@ -395,6 +407,10 @@ class koala_model:
                 except:
                     isError = True
 
+            # self.setProgressSubMsg("fnodes={}, tnodes={}, targetnearNodeDist={}".format(feature.attribute(self.__nodeID),
+            #                                                                             "NX"+feature.attribute(self.__nodeID),
+            #                                                                             targetnearNodeDist))
+
             weights.append(targetnearNodeDist)
 
         allnodes = list(set(tnodes))
@@ -458,6 +474,7 @@ class koala_model:
         return self.nxGraph
 
 
+    # 분석 결과를 source layer에 저장
     def make_networksumScore(self, output=None):
 
         finanallayer = self.qgsutils.addField(input=self.__sourcelayer,
@@ -474,13 +491,15 @@ class koala_model:
             if self.feedback.isCanceled(): return None
             self.feedback.setProgress(int(i / cnt * 100))
 
+            sourceid = feature[self.__sourceIDfid]
             feanodeid = feature[self.__nodeID]
-
+            score = None
             try:
-                score = self.__networkSum['NX_WEIGHT'].loc[self.__networkSum[self.__nodeID] == feanodeid]
+                # score = self.__networkSum['NX_WEIGHT'].loc[self.__networkSum[self.__nodeID] == feanodeid]
+                score = self.__networkSum['NX_WEIGHT'].loc[self.__networkSum[self.__sourceIDfid] == sourceid]
                 feature["NX_SCORE"] = float(score)
             except:
-                self.setProgressSubMsg('NODE : {}, NX_SCORE : {}'.format(feanodeid, score))
+                self.setProgressSubMsg('[Err] NODE : {}, sourceID : {}, NX_SCORE : {}'.format(feanodeid, sourceid, score))
 
             finanallayer.updateFeature(feature)
 
@@ -508,14 +527,15 @@ class koala_model:
 
 
     def anal_NetworkSum(self):
-
-        sourceNodefid = self.__nodeID
-        sourceNodeName = self.__namefidsourcelyr
+        # sourceNodeNamefid = self.__namefidsourcelyr
+        # sourceNodeName = self.__namefidsourcelyr
         # sourceNodeDistfid = 'HubDist'
-        targetNodefid = self.__nodeID
-        targetNodeName = self.__namefidtargetlyr
+        # targetNodeName = self.__namefidtargetlyr
         # targetNodeDistfid = 'HubDist'
 
+        sourceNodefid = self.__nodeID
+        targetNodefid = self.__nodeID
+        listsourceID = []
         listsourceNodeID = []
         listShortestSum = []
 
@@ -525,13 +545,13 @@ class koala_model:
         # tmptargetNodelist = None
         dicttargetNodeName = None
         if self.__isIndividual:
-            dicttargetNodeName = {"NX" + str(feature.attribute(targetNodefid)): feature.attribute(targetNodeName) for feature in self.__targetlayer.getFeatures()}
+            dicttargetNodeName = {"NX" + str(feature.attribute(targetNodefid)): feature.attribute(self.__namefidtargetlyr) for feature in self.__targetlayer.getFeatures()}
             targetNodelist = dicttargetNodeName.keys()
         else:
             tmptargetNodelist = [feature.attribute(targetNodefid) for feature in self.__targetlayer.getFeatures()]
             targetNodelist = list(map(lambda x: "NX" + str(x), tmptargetNodelist))
 
-        if self.debugging: self.setProgressSubMsg("[debug] targetNodelist : {}".format("도착레이어 선별 완료"))
+        if self.debugging: self.setProgressSubMsg("[debug] 도착레이어선별 완료 : targetNodelist({})".format(len(targetNodelist)))
 
         isError = False
         i = 0
@@ -544,11 +564,16 @@ class koala_model:
             if self.feedback.isCanceled(): return None
             self.feedback.setProgress(int(i / totalcnt * 100))
 
+            sourceID = feature[self.__sourceIDfid]
             sourceNodeId = feature[sourceNodefid]
-            sourceNodeName = feature[self.__namefidsourcelyr]
-            # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준)
+
+            sourceNodeName = None
+            if self.__isIndividual:
+                sourceNodeName = feature[self.__namefidsourcelyr]
+            # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준, 1%씩)
             if totalcnt > 1000:
-                self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
+                if i/(totalcnt/100) == 0 or (totalcnt-i) < (totalcnt/100):
+                    self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
 
             sourcenearNodeDist = 0
             if not isError:
@@ -566,8 +591,10 @@ class koala_model:
             # 최단거리 분석
             shortest = nx.single_source_dijkstra_path_length(self.nxGraph, sourceNodeId, weight='weight')
 
-        ###### 성능에 영향을 가장 많이 미치는 구간
-            if self.debugging: self.setProgressSubMsg("[debug-{}/{}] 출발({}) : 지정된 도착 레이어까지 최단거리 재계산 시작".format(i, totalcnt,sourceNodeId))
+            # 값 확인용
+            # if self.debugging: # self.setProgressSubMsg("[debug-{}/{}] 출발({}) : 지정된 도착 레이어까지 최단거리 재계산 시작".format(i, totalcnt,sourceNodeId))
+
+            ###### 성능에 영향을 가장 많이 미치는 구간
             # 데이터양에 따라 속도 영향 가장 많이 미치는 부분(속도 : 방법1 > 방법2 > 방법3) : 향후 참고용으로 주석으로 남겨둠
             # 방법1)
             # targetshortest = (val for idx, val in shortest.items() if (idx in targetNodelist))
@@ -584,9 +611,13 @@ class koala_model:
                 try:
                     shorest = shortest[targetNode]
                     shortestDistsum += shorest
+                    # if self.debugging:
+                    #     self.setProgressSubMsg("source({})->target({}) : {}".format(sourceNodeId, targetNode, shorest))
 
                 except KeyError:
+                    # 고립된 지역, 지오메트리 오류일 경우 발생
                     shorest = 0
+                    # if self.debugging: self.setProgressSubMsg("KeyError : source({})->target({})".format(sourceNodeId, targetNode))
                     pass
 
                 if self.__isIndividual:
@@ -599,19 +630,21 @@ class koala_model:
 
                     shortestValuesList.append(str(shorest))
 
+            listsourceID.append(sourceID)
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
 
+            # 값 확인용
+            # if self.debugging:
+            #     # continue
+            #     self.setProgressSubMsg("csvString type : {}".format(type(csvString)))
+            #     self.setProgressSubMsg("sourceNodeName type : {}".format(type(sourceNodeName)))
+            #     self.setProgressSubMsg("shortestDistsum type : {}".format(type(shortestDistsum)))
+            #     self.setProgressSubMsg("sourcenearNodeDist type : {}".format(type(sourcenearNodeDist)))
+            #     self.setProgressSubMsg("shortestValuesList type : {}".format(type(shortestValuesList)))
             if self.__isIndividual:
                 if i == 1:
                     csvString = ','.join(map(str, shortestHearderList))
-
-                if self.debugging:
-                    self.setProgressSubMsg("csvString type : {}".format(type(csvString)))
-                    self.setProgressSubMsg("sourceNodeName type : {}".format(type(sourceNodeName)))
-                    self.setProgressSubMsg("shortestDistsum type : {}".format(type(shortestDistsum)))
-                    self.setProgressSubMsg("sourcenearNodeDist type : {}".format(type(sourcenearNodeDist)))
-                    self.setProgressSubMsg("shortestValuesList type : {}".format(type(shortestValuesList)))
 
                 if sourceNodeName == None:
                     sourceNodeName = "출발지 명칭 누락({})".format(sourceNodeId)
@@ -621,7 +654,8 @@ class koala_model:
         if self.__isIndividual:
             self.__networkIndivisual = csvString
 
-        rawData = {sourceNodefid: listsourceNodeID,
+        rawData = {self.__sourceIDfid: listsourceID,
+                   sourceNodefid: listsourceNodeID,
                    "NX_WEIGHT": listShortestSum}
 
         self.__networkSum = pd.DataFrame(rawData)

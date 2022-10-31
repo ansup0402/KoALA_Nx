@@ -112,17 +112,24 @@ class koala_nx_launcher:
         model.createspatialindex(self.parameters['IN_SOURCELYR'].sourceName())
         sourcelayer = self.parameters['IN_SOURCELYR']
         out_path = None
-        if self.debugging: out_path = os.path.join(self.workpath, 'sourceLayerWithNode.gpkg')
         sourceLayerWithNode = model.nearesthubpoints(input=sourcelayer,
-                                                onlyselected=False,
-                                                sf_hub=model.nodelayer,
-                                                hubfield=model.nodeIDfield,
-                                                output=out_path
-                                                )
-        if isinstance(sourceLayerWithNode, str):
-            model.sourcelayer = model.writeAsVectorLayer(sourceLayerWithNode)
+                                                     onlyselected=False,
+                                                     sf_hub=model.nodelayer,
+                                                     hubfield=model.nodeIDfield,
+                                                     output=out_path
+                                                     )
+
+        out_path = None
+        if self.debugging: out_path = os.path.join(self.workpath, 'sourceLayerWithNode.gpkg')
+        sourceID = "NX_ID"
+        self.setDebugProgressMsg("source layer ID 필드 추가: {}...".format(sourceID))
+        sourcelayeraddedID = model.addIDField(input=sourceLayerWithNode, idfid=sourceID, output=out_path)
+        model.sourceIDfield = sourceID
+
+        if isinstance(sourcelayeraddedID, str):
+            model.sourcelayer = model.writeAsVectorLayer(sourcelayeraddedID)
         else:
-            model.sourcelayer = sourceLayerWithNode
+            model.sourcelayer = sourcelayeraddedID
 
 
         # 3. 도착 레이어 설정(IN_TARGETLYR)
@@ -136,11 +143,11 @@ class koala_nx_launcher:
         if self.debugging: out_path = os.path.join(self.workpath, 'targetLayerWithNode.gpkg')
         # source2 = model.vectorlayer2ShapeFile(sourcelayer, out_path)
         targetLayerWithNode = model.nearesthubpoints(input=targetlayer,
-                                                onlyselected=False,
-                                                sf_hub=model.nodelayer,
-                                                hubfield=model.nodeIDfield,
-                                                output=out_path
-                                                )
+                                                     onlyselected=False,
+                                                     sf_hub=model.nodelayer,
+                                                     hubfield=model.nodeIDfield,
+                                                     output=out_path
+                                                     )
         if isinstance(targetLayerWithNode, str):
             model.targetlayer = model.writeAsVectorLayer(targetLayerWithNode)
         else:
@@ -158,7 +165,7 @@ class koala_nx_launcher:
         graph = model.createNodeEdgeInGraph()
 
 
-        # 최근린 노드까지의 거리를 계산하기 위해 가상의 Nodelink 추가 필요.. -> 속도일때는 최소 앖으로 정해줌,
+        # 최근린 노드까지의 거리를 계산하기 위해 가상의 Nodelink 추가 필요.. -> 속도일때는 최소 값 정해줌,
         self.setDebugProgressMsg("target layer의 최근린 노드 추가 : addnearestNodeEdgeAsTargetlayer()...")
         if self.feedback.isCanceled(): return None
 
@@ -193,8 +200,11 @@ class koala_nx_launcher:
         shortestSum, shortestIndividual = model.anal_NetworkSum()
 
 
+        # 6. 분석 결과 저장
+        self.setProgressMsg('[6 단계] 분석결과 저장...')
+
+        # 개별 지점까지의 거리
         if self.parameters['IN_ISDIVISUAL'] == True:
-            self.setProgressMsg('[6 단계] 분석결과 저장(CSV)...')
             csvfilename = ''
             if self.parameters['OUT_CSV'] == 'TEMPORARY_OUTPUT':
                 import tempfile
@@ -210,8 +220,6 @@ class koala_nx_launcher:
             self.setProgressMsg("다음 위치에 CSV 파일이 생성되었습니다. : {}".format(csv_file))
 
 
-        # 6. 분석 결과 저장
-        self.setProgressMsg('[6 단계] 분석결과 저장(LAYER)...')
         if self.feedback.isCanceled(): return None
         self.setDebugProgressMsg("make_networksumScore()...")
         # out_path = os.path.join(self.workpath, 'networksumScore.gpkg')
