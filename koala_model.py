@@ -283,13 +283,13 @@ class koala_model:
                                               method=method,
                                               output=output)
 
-    def addIDField(self, input, idfid, output='TEMPORARY_OUTPUT'):
+    def addIDField(self, input, idfid, ftype=0, formula='$id', output='TEMPORARY_OUTPUT'):
         return self.qgsutils.fieldCalculate(input=input,
                                             fid=idfid,
-                                            ftype=0,
+                                            ftype=ftype,
                                             flen=10,
                                             fprecision=0,
-                                            formula='$id',
+                                            formula=formula,
                                             newfield=True,
                                             output=output)
 
@@ -572,7 +572,7 @@ class koala_model:
                 sourceNodeName = feature[self.__namefidsourcelyr]
             # 데이터 양이 많은 경우 보조 프로그레스바 필요(1000건 기준, 1%씩)
             if totalcnt > 1000:
-                if i/(totalcnt/100) == 0 or (totalcnt-i) < (totalcnt/100):
+                if i%(int(totalcnt/100)) == 0 or totalcnt == i:
                     self.setProgressSubMsg("[{}] 처리중 : {}/{}".format(sourceNodeId, i, totalcnt))
 
             sourcenearNodeDist = 0
@@ -634,14 +634,14 @@ class koala_model:
             listsourceNodeID.append(sourceNodeId)
             listShortestSum.append(shortestDistsum+sourcenearNodeDist)
 
-            # 값 확인용
+            # # 값 확인용
             # if self.debugging:
-            #     # continue
             #     self.setProgressSubMsg("csvString type : {}".format(type(csvString)))
             #     self.setProgressSubMsg("sourceNodeName type : {}".format(type(sourceNodeName)))
             #     self.setProgressSubMsg("shortestDistsum type : {}".format(type(shortestDistsum)))
             #     self.setProgressSubMsg("sourcenearNodeDist type : {}".format(type(sourcenearNodeDist)))
             #     self.setProgressSubMsg("shortestValuesList type : {}".format(type(shortestValuesList)))
+
             if self.__isIndividual:
                 if i == 1:
                     csvString = ','.join(map(str, shortestHearderList))

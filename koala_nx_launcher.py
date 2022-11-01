@@ -67,23 +67,6 @@ class koala_nx_launcher:
         model = koala_model(feedback=self.feedback, context=self.context, debugmode=self.debugging, workpath=self.workpath)
 
 
-        ######################################## CSV 경로 테스트
-        # self.setDebugProgressMsg(self.parameters['OUT_CSV'])
-        # csvfilename = os.path.abspath(self.parameters['OUT_CSV'])
-        # csvfilename = csvfilename
-        # # csvfilename = 'C://Users//ansup//Documents//ws_ansup//Private_gdrv//test_nodelink//[2021-07-13]NODELINKDATA//vvvv.csv'
-        # # csvfilename = r"C:\Users\ansup\Documents\ws_ansup\Private_gdrv\test_nodelink\[2021-07-13]NODELINKDATA\vvvv.csv"
-        # self.setProgressMsg("aaa: " + csvfilename)
-        # csv_file = open(csvfilename, "w")
-        # n = csv_file.write("AAA")
-        # csv_file.close()
-        # return None
-        ######################################################
-
-
-
-
-
         # 1. 노드, 링크 레이어 설정
         self.setProgressMsg('[1 단계] 노드, edge 레이어 초기화...')
         if self.feedback.isCanceled(): return None
@@ -123,7 +106,7 @@ class koala_nx_launcher:
         if self.debugging: out_path = os.path.join(self.workpath, 'sourceLayerWithNode.gpkg')
         sourceID = "NX_ID"
         self.setDebugProgressMsg("source layer ID 필드 추가: {}...".format(sourceID))
-        sourcelayeraddedID = model.addIDField(input=sourceLayerWithNode, idfid=sourceID, output=out_path)
+        sourcelayeraddedID = model.addIDField(input=sourceLayerWithNode, idfid=sourceID, ftype=2, formula="""'nx' + to_string($id)""", output=out_path)
         model.sourceIDfield = sourceID
 
         if isinstance(sourcelayeraddedID, str):
@@ -204,6 +187,7 @@ class koala_nx_launcher:
         self.setProgressMsg('[6 단계] 분석결과 저장...')
 
         # 개별 지점까지의 거리
+        finalcsv = None
         if self.parameters['IN_ISDIVISUAL'] == True:
             csvfilename = ''
             if self.parameters['OUT_CSV'] == 'TEMPORARY_OUTPUT':
@@ -217,6 +201,7 @@ class koala_nx_launcher:
             csv_file = open(csvfilename, "w")
             n = csv_file.write(shortestIndividual)
             csv_file.close()
+            finalcsv = csvfilename
             self.setProgressMsg("다음 위치에 CSV 파일이 생성되었습니다. : {}".format(csv_file))
 
 
@@ -227,7 +212,7 @@ class koala_nx_launcher:
 
 
 
-        return finallayer
+        return finallayer, finalcsv
 
 
     def execute_nx_distance(self):

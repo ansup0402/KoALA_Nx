@@ -40,6 +40,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
+                       QgsVectorLayer,
                        QgsProject,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink,
@@ -371,8 +372,12 @@ class KoalaNxDistanceAlgorithm(QgsProcessingAlgorithm):
         launcher = koala_nx_launcher(feedback=feedback, context=context, parameters=params, debugging=self.debugmode,
                                         workpath=self.temporaryDirectory)
 
+        out_vector, out_csv = launcher.execute_nx()
 
-        out_vector = launcher.execute_nx()
+        if out_csv != None:
+            uri = 'file:///%s?type=csv?delimiter=%s' % (out_csv, ",")
+            csv_layer = QgsVectorLayer(uri, 'Result_csv', 'delimitedtext')
+            QgsProject.instance().addMapLayer(csv_layer)
 
         return {self.OUTPUT: out_vector}
 

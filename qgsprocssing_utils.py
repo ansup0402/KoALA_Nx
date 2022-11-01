@@ -200,6 +200,7 @@ class qgsprocessUtils:
 
         return self.run_algprocessing(algname=algname, params=params)['OUTPUT']
 
+    # ftype : 0 — Float, 1 — Integer, 2 — String, 3 — Date
     def fieldCalculate(self, input, fid, ftype, flen, fprecision, formula, newfield=False,
                        output='TEMPORARY_OUTPUT'):
 

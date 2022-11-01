@@ -40,6 +40,7 @@ from qgis.core import (QgsProcessing,
                        QgsProcessingParameterField,
                        QgsProcessingParameterEnum,
                        QgsProcessingParameterNumber,
+                       QgsVectorLayer,
                        QgsProject,
                        QgsProcessingParameterString,
                        QgsProcessingParameterFeatureSink,
@@ -411,7 +412,12 @@ class KoalaNxSpeedAlgorithm(QgsProcessingAlgorithm):
                                         workpath=self.temporaryDirectory)
 
 
-        out_vector = launcher.execute_nx()
+        out_vector, out_csv = launcher.execute_nx()
+
+        if out_csv != None:
+            uri = 'file:////%s?type=csv?delimiter=%s' % (out_csv, ",")
+            csv_layer = QgsVectorLayer(uri, 'result', 'delimitedtext')
+            QgsProject.instance().addMapLayer(csv_layer)
 
         return {self.OUTPUT: out_vector}
 
