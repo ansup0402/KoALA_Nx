@@ -8,9 +8,9 @@ KoALA-Nx supports optimal network analysis in various network environments. User
 Prerequisites
 ------------------------------
 - Reference Data(In Korea)
-    * Standard Node/Link : [National Transport Information Center(Node, Link)](http://nodelink.its.go.kr/data/data01.aspx)
-    * Administrative area : [Korea National Spatial Data Infrastructure Portal(Administrative area)](http://data.nsdi.go.kr/dataset/15144)
-    * Road(To create node&link data) : [Korea National Spatial Data Infrastructure Portal(Road)](http://data.nsdi.go.kr/dataset/12902)
+    * Standard Node/Link : [National Transport Information Center(Node, Link)](https://www.its.go.kr/nodelink/nodelinkRef)
+    * Administrative area : [V-World Digital Twin National Land(Administrative area)](https://www.vworld.kr/data/v4dc_svcdata_s002.do?pageIndex=1&datIde=DAT_0000000000000114&ctmCde=&searchCondition=&searchKeyword=)
+    * Road(To create node&link data) : [V-World Digital Twin National Land(Road)](https://www.vworld.kr/)
 - QGIS Minimum Version >= 3.10
 - Requires 'pandas' library
      
